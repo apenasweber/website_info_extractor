@@ -49,9 +49,9 @@ class DataExtractor:
     def extract_phone_numbers(self):
         if not self.soup:
             return []
-        phones = {}  # Use a dictionary to map normalized numbers to formatted ones
+        phones = {}
         phone_pattern = re.compile(
-            r"\(?\+?\d{1,3}\)?[\s-]?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,4}"
+            r"\(?\+?\d{1,3}\)?[\s\-/]?\d{1,4}[\s\-/]?\d{1,4}[\s\-/]?\d{1,4}"
         )
 
         # Extracting from 'tel:' links
@@ -59,8 +59,8 @@ class DataExtractor:
         for link in tel_links:
             tel_number = link["href"].replace("tel:", "").strip()
             norm_number = re.sub(
-                r"[^\d]", "", tel_number
-            )  # Normalize by removing non-numeric chars
+                r"[^\d\+]", "", tel_number
+            )  # Normalize by keeping only digits and plus
             phones[norm_number] = tel_number  # Store using normalized number as key
 
         # Search within text nodes for additional numbers
@@ -68,8 +68,15 @@ class DataExtractor:
         for node in text_nodes:
             found_numbers = phone_pattern.findall(node)
             for number in found_numbers:
-                cleaned_number = re.sub(r"[^\d\+\(\)]", "", number).strip()
-                norm_number = re.sub(r"[^\d]", "", cleaned_number)  # Normalize
+                cleaned_number = re.sub(
+                    r"[^\d\+]", " ", number
+                ).strip()  # Replace unwanted chars with space
+                cleaned_number = re.sub(
+                    r"\s+", " ", cleaned_number
+                )  # Collapse multiple spaces to one
+                norm_number = re.sub(
+                    r"[^\d]", "", cleaned_number
+                )  # Normalize to keep only digits
                 if 7 <= len(norm_number) <= 15:  # Check normalized length
                     phones[norm_number] = cleaned_number  # Store original format
 
