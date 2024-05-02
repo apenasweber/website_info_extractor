@@ -12,4 +12,3 @@ requests==2.31.0
 soupsieve==2.5
 tomli==2.0.1
 urllib3==2.2.1
-Website-Info-Extractor @ file:///C:/Users/andwe/OneDrive/Documentos/website_info_extractor
